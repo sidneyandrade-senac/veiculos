@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -71,6 +72,7 @@ class FabricanteControllerTest {
         // cria um fabricante específico para o teste
         String nome = "MarcaBusca" + System.currentTimeMillis();
         String body = "{\"nome\":\"" + nome + "\",\"paisOrigem\":\"Brasil\"}";
+        //location = http://localhost/api/fabricantes/139
         String location = mockMvc.perform(post("/api/fabricantes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
@@ -104,8 +106,7 @@ class FabricanteControllerTest {
         String nomeAtualizado = nomeOriginal + "Atualizado";
         String updateJson = "{\"nome\":\"" + nomeAtualizado + "\",\"paisOrigem\":\"Chile\"}";
 
-        mockMvc.perform(
-                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/fabricantes/" + id)
+        mockMvc.perform(put("/api/fabricantes/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateJson))
                 .andExpect(status().isOk())
