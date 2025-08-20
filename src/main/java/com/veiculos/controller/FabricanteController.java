@@ -3,6 +3,7 @@ package com.veiculos.controller;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -14,11 +15,9 @@ import com.veiculos.service.FabricanteService;
 @RequestMapping("/api/fabricantes")
 public class FabricanteController {
 
-    private final FabricanteService service;
+    @Autowired
+    private FabricanteService service;
 
-    public FabricanteController(FabricanteService service) {
-        this.service = service;
-    }
 
     @GetMapping
     public List<FabricanteDTO> listar() {
@@ -36,6 +35,7 @@ public class FabricanteController {
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(criado.getId()).toUri();
         return ResponseEntity.created(location).body(criado);
+        //return ResponseEntity.created(null).body(criado);
     }
 
     @PutMapping("/{id}")

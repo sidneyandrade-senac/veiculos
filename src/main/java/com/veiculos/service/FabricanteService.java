@@ -2,6 +2,7 @@ package com.veiculos.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,11 +14,8 @@ import com.veiculos.repository.FabricanteRepository;
 @Service
 public class FabricanteService {
 
-    private final FabricanteRepository repository;
-
-    public FabricanteService(FabricanteRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private FabricanteRepository repository;
 
     @Transactional(readOnly = true)
     public List<FabricanteDTO> listar() {
