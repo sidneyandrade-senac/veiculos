@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Painel de Health Check</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e3f2fd 0%, #f8bbd0 100%);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 48px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(25, 118, 210, 0.10);
+            padding: 36px 32px 28px 32px;
+        }
+        h1 {
+            text-align: center;
+            color: #1976d2;
+            margin-bottom: 32px;
+            letter-spacing: 1px;
+        }
+        .status {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .up { color: #43a047; }
+        .down { color: #d32f2f; }
+    .degraded { color: #f9a825; }
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+        .card {
+            background: #f5faff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+            padding: 20px 18px 16px 18px;
+            min-width: 280px;
+            max-width: 300px;
+            flex: 1 1 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+            word-break: break-all;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+    /* Destaque visual por status no card */
+    .card.status-up { border-left: 4px solid #43a047; }
+    .card.status-degraded { border-left: 4px solid #f9a825; }
+    .card.status-down { border-left: 4px solid #d32f2f; }
+        .card-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-status {
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .ok { color: #43a047; }
+        .ruim { color: #d32f2f; }
+        .bom { color: #fbc02d; }
+        .otimo { color: #1976d2; }
+        .erro { color: #d32f2f; }
+    /* texto para degradado */
+    .degraded { color: #f9a825; }
+        .label {
+            font-weight: 500;
+            color: #555;
+            margin-right: 4px;
+        }
+        .value {
+            font-weight: 400;
+            color: #222;
+        }
+        .timestamp {
+            text-align: right;
+            color: #888;
+            font-size: 0.95em;
+            margin-top: 18px;
+        }
+        .icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        a {
+            color: #1976d2;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Health Check</h1>
+    <div id="health-content">
+        <div>Carregando...</div>
+    </div>
+    <div class="timestamp" id="timestamp"></div>
+</div>
+<script>
+const REFRESH_MS = 10000; // intervalo de atualização automática
+// SVGs inline para cada tipo de health
+const icons = {
+    db: `<svg class="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3" fill="#90caf9"/><rect x="4" y="6" width="16" height="12" rx="4" fill="#1976d2"/><ellipse cx="12" cy="18" rx="8" ry="3" fill="#90caf9"/></svg>`,
+    diskspace: `<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="3" fill="#43a047"/><rect x="7" y="11" width="2" height="2" rx="1" fill="#fff"/><rect x="15" y="11" width="2" height="2" rx="1" fill="#fff"/></svg>`,
+    ssl: `<svg class="icon" viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="8" rx="2" fill="#bdbdbd"/><rect x="9" y="6" width="6" height="6" rx="3" fill="#1976d2"/></svg>`,
+    veiculos: `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#1976d2"/><rect x="7" y="10" width="10" height="5" rx="2" fill="#fff"/><circle cx="9" cy="16" r="1.5" fill="#1976d2"/><circle cx="15" cy="16" r="1.5" fill="#1976d2"/></svg>`,
+    responsetime: `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fbc02d"/><rect x="11" y="6" width="2" height="7" rx="1" fill="#fff"/><rect x="11" y="13" width="5" height="2" rx="1" fill="#fff"/></svg>`,
+    default: `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#bdbdbd"/></svg>`
+};
+function getIcon(key) {
+    // Normaliza o nome para minúsculo e remove sufixos comuns
+    const norm = key.toLowerCase().replace(/indicator|health/g,"");
+    if (icons[norm]) return icons[norm];
+    // Tenta por partes do nome
+    if (norm.includes("veiculos")) return icons.veiculos;
+    if (norm.includes("response")) return icons.responsetime;
+    if (norm.includes("disk")) return icons.diskspace;
+    if (norm.includes("db")) return icons.db;
+    if (norm.includes("ssl")) return icons.ssl;
+    return icons.default;
+}
+function beautifyName(key) {
+    // Deixa o nome mais amigável
+    return key.replace(/([A-Z])/g, ' $1').replace(/indicator|health/gi,"").replace(/^./, s => s.toUpperCase()).replace(/_/g, ' ').trim();
+}
+function renderHealth(data) {
+    let html = '';
+    const statusMap = s => (s === 'UP' ? 'up' : (s === 'DEGRADED' ? 'degraded' : 'down'));
+    const status = statusMap(data.status);
+    html += `<div class="status ${status}">Status geral: <span class="${status}">${data.status}</span></div>`;
+    if (data.components) {
+        html += '<div class="cards">';
+        for (const [key, comp] of Object.entries(data.components)) {
+            if (key === 'ping' || key === 'livenessState' || key === 'readinessState') continue;
+            const compStatus = statusMap(comp.status || 'UNKNOWN');
+            html += `<div class="card status-${compStatus}">
+                <div class="card-title">${getIcon(key)} ${beautifyName(key)}</div>`;
+            if (comp.status) {
+                const textClass = comp.status === 'UP' ? 'ok' : (comp.status === 'DEGRADED' ? 'degraded' : 'ruim');
+                html += `<div class="card-status ${textClass}">${comp.status}</div>`;
+            }
+            if (comp.details) {
+                // Exibe todos os campos do details
+                for (const [dkey, dval] of Object.entries(comp.details)) {
+                    let label = dkey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/^./, s => s.toUpperCase());
+                    let value = dval;
+                    if (typeof dval === 'boolean') {
+                        value = dval ? 'Sim' : 'Não';
+                    } else if (typeof dval === 'object' && Array.isArray(dval)) {
+                        value = dval.length === 0 ? 'Nenhum' : dval.join(', ');
+                    } else if (typeof dval === 'object' && dval !== null) {
+                        value = JSON.stringify(dval);
+                    }
+                    if (dkey === 'externalApi') {
+                        value = `<a href="${dval}" target="_blank">${dval}</a>`;
+                    }
+                    // Converter bytes para GB/MB
+                    if (["total","free","threshold"].includes(dkey) && typeof dval === 'number') {
+                        if (dval >= 1073741824) {
+                            value = (dval/1073741824).toFixed(2) + ' GB';
+                        } else if (dval >= 1048576) {
+                            value = (dval/1048576).toFixed(2) + ' MB';
+                        } else if (dval >= 1024) {
+                            value = (dval/1024).toFixed(2) + ' KB';
+                        } else {
+                            value = dval + ' bytes';
+                        }
+                    }
+                    html += `<div><span class="label">${label}:</span> <span class="value">${value}</span></div>`;
+                }
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+    }
+    document.getElementById('health-content').innerHTML = html;
+    document.getElementById('timestamp').textContent = 'Atualizado em: ' + new Date().toLocaleString() + ' • Auto: ' + (REFRESH_MS/1000) + 's';
+}
+
+function loadHealth() {
+    fetch('/actuator/health')
+        .then(resp => resp.json())
+        .then(data => renderHealth(data))
+        .catch(() => {
+            document.getElementById('health-content').innerHTML = '<div class="ruim">Erro ao carregar health check.</div>';
+        });
+}
+
+// primeira carga + atualizações automáticas
+loadHealth();
+setInterval(loadHealth, REFRESH_MS);
+</script>
+</body>
+</html>
