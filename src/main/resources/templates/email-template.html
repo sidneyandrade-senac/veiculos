@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Notificação</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f3f4f6;
+        color: #111827;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+          Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      }
+      .container { width: 100%; padding: 24px 0; background: #f3f4f6; }
+      .email-card {
+        max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(17, 24, 39, 0.12); overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        padding: 24px; color: #ffffff;
+      }
+      .brand { font-weight: 700; font-size: 20px; letter-spacing: .2px; }
+      .content { padding: 24px; line-height: 1.6; font-size: 16px; }
+      .content h1 { margin: 0 0 12px; font-size: 22px; color: #111827; }
+      .content p { margin: 0 0 16px; }
+      .button {
+        display: inline-block; background: #4f46e5; color: #fff !important; text-decoration: none;
+        padding: 12px 18px; border-radius: 8px; font-weight: 600;
+      }
+      .footer {
+        padding: 16px 24px; background: #f9fafb; font-size: 12px; color: #6b7280; text-align: center;
+      }
+      .footer a { color: #4f46e5; text-decoration: none; }
+      @media (prefers-color-scheme: dark) {
+        body { background: #0b1020; color: #e5e7eb; }
+        .email-card { background: #111827; box-shadow: 0 8px 28px rgba(0,0,0,.35); }
+        .content h1 { color: #f9fafb; }
+        .footer { background: #0f172a; color: #94a3b8; }
+        .button { background: #6366f1; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <table class="email-card" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+        <tr>
+          <td class="header">
+            <div class="brand">Veículos App</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="content">
+            <h1>Olá, ${nome}!</h1>
+            <p>${mensagem}</p>
+            <!--
+            <p><a href="${ctaUrl}" class="button">Acessar</a></p>
+            -->
+          </td>
+        </tr>
+        <tr>
+          <td class="footer">
+            <p>Esta é uma mensagem automática. Não responda este e-mail.</p>
+            <p>Veículos App • Rua Exemplo, 123 • São Paulo, SP</p>
+            <p>
+              <a href="https://example.com">Site</a> •
+              <a href="mailto:suporte@example.com">Suporte</a> •
+              <a href="${unsubscribeUrl}">Descadastrar</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>
