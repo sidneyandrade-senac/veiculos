@@ -28,10 +28,14 @@ public final class FabricanteMapper {
     }
 
     public static List<FabricanteDTO> toDTOList(List<Fabricante> list) {
-        return list == null ? List.of() : list.stream().map(FabricanteMapper::toDTO).collect(Collectors.toList());
+        return list == null ? 
+                    List.of() : 
+                    list.stream().map(FabricanteMapper::toDTO).collect(Collectors.toList());
     }
 
     public static List<Fabricante> toEntityList(List<FabricanteDTO> list) {
-        return list == null ? List.of() : list.stream().map(FabricanteMapper::toEntity).collect(Collectors.toList());
+        return list == null ? 
+                    List.of() : 
+                    list.stream().map(FabricanteMapper::toEntity).collect(Collectors.toList());
     }
 }

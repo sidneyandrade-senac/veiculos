@@ -8,4 +8,7 @@ import com.veiculos.entity.Fabricante;
 @Repository
 public interface FabricanteRepository extends JpaRepository<Fabricante, Long> {
     boolean existsByNome(String nome);
+    String findByNome(String nome);
+    String findByPaisOrigem(String paisOrigem);
+
 }
