@@ -24,6 +24,16 @@ public class VeiculoController {
     @GetMapping("/{id}")
     public VeiculoDTO buscar(@PathVariable Long id) { return service.buscarPorId(id); }
 
+    @GetMapping("/placa/{placa}")
+    public VeiculoDTO buscarPorPlaca(@PathVariable String placa) {
+        return service.buscarPorPlaca(placa);
+    }
+
+    @GetMapping("/placa")
+    public List<VeiculoDTO> buscarPorPlacaParcial(@RequestParam("trecho_placa") String trecho_placa) {
+        return service.buscarPorPlacaParcial(trecho_placa);
+    }
+
     @PostMapping
     public ResponseEntity<VeiculoDTO> criar(@RequestBody VeiculoDTO dto) {
         VeiculoDTO criado = service.criar(dto);

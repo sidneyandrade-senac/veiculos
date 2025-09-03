@@ -34,6 +34,24 @@ public class VeiculoService {
                 .orElseThrow(() -> new RuntimeException("Veículo não encontrado"));
     }
 
+    @Transactional(readOnly = true)
+    public VeiculoDTO buscarPorPlaca(String placa) {
+        if (placa == null || placa.isBlank()) {
+            throw new IllegalArgumentException("Placa deve ser informada");
+        }
+        return repository.findByPlaca(placa.trim())
+                .map(VeiculoMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Veículo não encontrado para a placa informada"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<VeiculoDTO> buscarPorPlacaParcial(String termo) {
+        if (termo == null || termo.isBlank()) {
+            throw new IllegalArgumentException("Termo de busca da placa deve ser informado");
+        }
+        return VeiculoMapper.toDTOList(repository.findByPlacaContainingIgnoreCase(termo.trim()));
+    }
+
     @Transactional
     public VeiculoDTO criar(VeiculoDTO dto) {
         if (dto.getId() != null) {
