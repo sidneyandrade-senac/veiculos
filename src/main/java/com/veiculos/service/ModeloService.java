@@ -1,6 +1,5 @@
 package com.veiculos.service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +44,6 @@ public class ModeloService {
         if (dto.getFabricante() == null || dto.getFabricante().getId() == null) {
             throw new IllegalArgumentException("Fabricante inválido");
         }
-        // if (dto.getAno() == null || dto.getAno() < 1886 || dto.getAno() > LocalDate.now().getYear() + 1) {
-        //     throw new IllegalArgumentException("Ano inválido");
-        // }
         if (fabricanteRepository.findById(dto.getFabricante().getId()).isEmpty()) {
             throw new IllegalArgumentException("Fabricante não encontrado");
         }

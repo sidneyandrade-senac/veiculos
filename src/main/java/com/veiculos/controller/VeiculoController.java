@@ -5,6 +5,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -18,8 +22,22 @@ public class VeiculoController {
     @Autowired
     private VeiculoService service;
 
+    //Personalizável via query params: ?page=0&size=10&sort=dataCadastro,desc ou outro campo (ex.: placa,asc).
+    //QUANDO PASSADO VALOR SEM OS PARAMETROS PEGA O DEFAULT
+    //para paginar usar ?page=1 ... ?page=2
     @GetMapping
-    public List<VeiculoDTO> listar() { return service.listar(); }
+    public Page<VeiculoDTO> listar(
+            @PageableDefault(size = 4, sort = "dataCadastro", direction = Sort.Direction.DESC) 
+            Pageable pageable
+    ) {
+        return service.listar(pageable);
+    }
+
+    //lista todos sem paginação
+    @GetMapping("/todos")
+    public List<VeiculoDTO> listarTodos() {
+        return service.listar();
+    }
 
     @GetMapping("/{id}")
     public VeiculoDTO buscar(@PathVariable Long id) { return service.buscarPorId(id); }
