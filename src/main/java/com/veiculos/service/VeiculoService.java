@@ -14,6 +14,7 @@ import com.veiculos.entity.Veiculo;
 import com.veiculos.mapper.VeiculoMapper;
 import com.veiculos.repository.ModeloRepository;
 import com.veiculos.repository.VeiculoRepository;
+import com.veiculos.util.ValidaVeiculo;
 
 @Service
 public class VeiculoService {
@@ -62,8 +63,12 @@ public class VeiculoService {
 
     @Transactional
     public VeiculoDTO criar(VeiculoDTO dto) {
+        //todos as excecoes IllegalArgumentException que nao foram tratadas serao capturadas pelo GlobalExceptionHandler e retornam 400 Bad Request ou 409 Conflict
         if (dto.getId() != null) {
             throw new IllegalArgumentException("Novo veículo não deve ter ID");
+        }
+         if (!ValidaVeiculo.isPlacaValida(dto)) {
+            throw new IllegalArgumentException("Placa inválida");
         }
         if (repository.existsByPlaca(dto.getPlaca())) {
             throw new IllegalArgumentException("Já existe veículo com essa placa");
@@ -83,6 +88,7 @@ public class VeiculoService {
 
     @Transactional
     public VeiculoDTO atualizar(Long id, VeiculoDTO dto) {
+        //valida??es similares a criar, mas permite atualizar parcialmente (PATCH)
         Veiculo existente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Veículo não encontrado"));
         if (dto.getPlaca() != null && !dto.getPlaca().equals(existente.getPlaca())) {
