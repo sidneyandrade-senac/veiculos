@@ -77,6 +77,14 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.5.0</version>
 		</dependency>
+		<!-- adicionando essa depedencia ja ativa o protecao, no navegador aparece um formulario padrao do spring -->
+		<!-- usuario: user -->
+		<!-- senha: copiar do terminal -->
+		 <!-- pode testar no postman ou no proprio navegador  -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 
 	</dependencies>
 
