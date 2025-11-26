@@ -33,7 +33,7 @@ class FabricanteControllerTest {
     @DisplayName("Deve cadastrar fabricante com sucesso")
     void deveCadastrarFabricante() throws Exception {
         String nomeGerado = "Toyota" + System.currentTimeMillis();
-        String json = "{\"nome\":\"" + nomeGerado + "\",\"paisOrigem\":\"Japao\"}"; // nome ˙nico por execuÁ„o
+        String json = "{\"nome\":\"" + nomeGerado + "\",\"paisOrigem\":\"Japao\"}"; // nome √∫nico por execu√ß√£o
 
         long before = repository.count();
 
@@ -50,7 +50,7 @@ class FabricanteControllerTest {
     }
 
     @Test
-    @DisplayName("Deve listar fabricantes incluindo o recÈm criado")
+    @DisplayName("Deve listar fabricantes incluindo o rec√©m criado")
     void deveListarFabricantes() throws Exception {
         // garante ao menos um registro
         if (repository.count() == 0) {
@@ -69,7 +69,7 @@ class FabricanteControllerTest {
     @Test
     @DisplayName("Deve buscar fabricante por id")
     void deveBuscarPorId() throws Exception {
-        // cria um fabricante especÌfico para o teste
+        // cria um fabricante espec√≠fico para o teste
         String nome = "MarcaBusca" + System.currentTimeMillis();
         String body = "{\"nome\":\"" + nome + "\",\"paisOrigem\":\"Brasil\"}";
         //location = http://localhost/api/fabricantes/139
@@ -122,7 +122,7 @@ class FabricanteControllerTest {
     }
 
     @Test
-    @DisplayName("Deve deletar fabricante e n„o encontr·-lo mais")
+    @DisplayName("Deve deletar fabricante e n√£o encontr√°-lo mais")
     void deveDeletarFabricante() throws Exception {
         String nome = "MarcaDel" + System.currentTimeMillis();
         String body = "{\"nome\":\"" + nome + "\",\"paisOrigem\":\"Chile\"}";
@@ -137,7 +137,7 @@ class FabricanteControllerTest {
         mockMvc.perform(delete("/api/fabricantes/" + id))
                 .andExpect(status().isNoContent());
 
-        // valida que n„o existe mais
+        // valida que n√£o existe mais
         assertThat(repository.findById(Long.parseLong(id))).isEmpty();
     }
 }

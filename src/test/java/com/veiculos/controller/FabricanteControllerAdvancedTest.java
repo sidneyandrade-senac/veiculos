@@ -16,12 +16,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Testes avanÁados de integraÁ„o para FabricanteController.
- * Escopo cobre cen·rios:
- * 1. CriaÁ„o: sucesso, duplicado, ID indevido, (campos obrigatÛrios / tamanho / JSON inv·lido - TODO)
+ * Testes avan√ßados de integra√ß√£o para FabricanteController.
+ * Escopo cobre cen√°rios:
+ * 1. Cria√ß√£o: sucesso, duplicado, ID indevido, (campos obrigat√≥rios / tamanho / JSON inv√°lido - TODO)
  * 2. Leitura: lista vazia, lista com itens, buscar inexistente
- * 3. AtualizaÁ„o: sucesso, inexistente, duplicidade (ainda n„o tratada)
- * 4. DeleÁ„o: sucesso, inexistente
+ * 3. Atualiza√ß√£o: sucesso, inexistente, duplicidade (ainda n√£o tratada)
+ * 4. Dele√ß√£o: sucesso, inexistente
  * 5. Contagem preservada em falhas
  *
  * NOTA: Atualmente RuntimeException/IllegalArgumentException sem @ControllerAdvice retornam 500.
@@ -46,9 +46,9 @@ class FabricanteControllerAdvancedTest {
         return "{\"nome\":\"" + nome + "\",\"paisOrigem\":\"" + pais + "\"}";
     }
 
-    // 1. CriaÁ„o
+    // 1. Cria√ß√£o
     @Nested
-    @DisplayName("1. CriaÁ„o")
+    @DisplayName("1. Cria√ß√£o")
     class Criacao {
         @Test
         @DisplayName("1.1 Deve criar com sucesso")
@@ -66,7 +66,7 @@ class FabricanteControllerAdvancedTest {
         }
 
         @Test
-    @DisplayName("1.2 N„o deve permitir duplicado (409)")
+    @DisplayName("1.2 N√£o deve permitir duplicado (409)")
         void naoPermiteDuplicado() throws Exception {
             String nome = novoNomeUnico("Dup");
             mockMvc.perform(post("/api/fabricantes").contentType(MediaType.APPLICATION_JSON).content(json(nome, "BR")))
@@ -78,7 +78,7 @@ class FabricanteControllerAdvancedTest {
         }
 
         @Test
-    @DisplayName("1.3 N„o deve aceitar ID no corpo (400)")
+    @DisplayName("1.3 N√£o deve aceitar ID no corpo (400)")
         void naoAceitaIdNoCorpo() throws Exception {
             long before = repository.count();
             String payload = "{\"id\":1,\"nome\":\"" + novoNomeUnico("ComId") + "\",\"paisOrigem\":\"BR\"}";
@@ -86,11 +86,11 @@ class FabricanteControllerAdvancedTest {
             .andExpect(status().isBadRequest());
             assertThat(repository.count()).isEqualTo(before);
         }
-        // TODO 1.x Campos obrigatÛrios / tamanho / JSON inv·lido quando houver validaÁ„o e handler.
+        // TODO 1.x Campos obrigat√≥rios / tamanho / JSON inv√°lido quando houver valida√ß√£o e handler.
     }
 
     // 2. Leitura
-    //No JUnit 5 usar @Nested em classes internas (n„o static) È um padr„o para agrupar cen·rios de teste 
+    //No JUnit 5 usar @Nested em classes internas (n√£o static) √© um padr√£o para agrupar cen√°rios de teste 
     @Nested
     @DisplayName("2. Leitura")
     class Leitura {
@@ -127,9 +127,9 @@ class FabricanteControllerAdvancedTest {
         }
     }
 
-    // 3. AtualizaÁ„o
+    // 3. Atualiza√ß√£o
     @Nested
-    @DisplayName("3. AtualizaÁ„o")
+    @DisplayName("3. Atualiza√ß√£o")
     class Atualizacao {
         @Test
         @DisplayName("3.1 Atualiza com sucesso")
@@ -141,7 +141,7 @@ class FabricanteControllerAdvancedTest {
                     .andExpect(status().isCreated())
                     .andReturn().getResponse().getHeader("Location");
             assertThat(loc).as("Location header deve estar presente").isNotNull();
-            String id = loc != null ? loc.substring(loc.lastIndexOf('/') + 1) : ""; // loc n„o È nulo devido ao assert
+            String id = loc != null ? loc.substring(loc.lastIndexOf('/') + 1) : ""; // loc n√£o √© nulo devido ao assert
             String novoNome = novoNomeUnico("Atual");
             mockMvc.perform(put("/api/fabricantes/" + id)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +161,7 @@ class FabricanteControllerAdvancedTest {
         }
 
         @Test
-    @DisplayName("3.3 Atualizar para nome duplicado agora deve retornar 409 (apÛs handler)")
+    @DisplayName("3.3 Atualizar para nome duplicado agora deve retornar 409 (ap√≥s handler)")
         void atualizaDuplicadoHojePermite() throws Exception {
             String nome1 = novoNomeUnico("A1");
             String nome2 = novoNomeUnico("A2");
@@ -178,9 +178,9 @@ class FabricanteControllerAdvancedTest {
         }
     }
 
-    // 4. DeleÁ„o
+    // 4. Dele√ß√£o
     @Nested
-    @DisplayName("4. DeleÁ„o")
+    @DisplayName("4. Dele√ß√£o")
     class Delecao {
         @Test
     @DisplayName("4.1 Deleta com sucesso e depois 404 no GET")
@@ -191,7 +191,7 @@ class FabricanteControllerAdvancedTest {
                             .content(json(nome, "BR")))
                     .andExpect(status().isCreated())
                     .andReturn().getResponse().getHeader("Location");
-            assertThat(loc).as("Location header deve estar presente para deleÁ„o").isNotNull();
+            assertThat(loc).as("Location header deve estar presente para dele√ß√£o").isNotNull();
             String id = loc != null ? loc.substring(loc.lastIndexOf('/') + 1) : "";
             mockMvc.perform(delete("/api/fabricantes/" + id))
                     .andExpect(status().isNoContent());

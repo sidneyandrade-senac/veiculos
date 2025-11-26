@@ -7,7 +7,7 @@ import com.veiculos.dto.FabricanteDTO;
 import com.veiculos.entity.Fabricante;
 
 /**
- * Mapper manual para convers„o entre Fabricante e FabricanteDTO.
+ * Mapper manual para convers√£o entre Fabricante e FabricanteDTO.
  */
 public final class FabricanteMapper {
 

@@ -23,7 +23,7 @@ import com.veiculos.repository.FabricanteRepository;
  * - readOnly = true indica que o método não deve realizar alterações (escritas) no banco. Essa dica permite otimizações
  *   no provedor JPA e no banco (p. ex., evita flush automático), sendo apropriado para consultas.
  *
- * Observa??o sobre efeitos colaterais dentro da transa??o:
+ * Observação sobre efeitos colaterais dentro da transação:
  * - Operações externas (como envio de e-mail) não participam da transação do banco. Se o e-mail for enviado dentro
  *   do método e depois ocorrer um rollback, o e-mail já terá sido enviado. Para consistência, considere publicar um
  *   evento pós-commit (TransactionSynchronization) ou usar padrão Outbox.
@@ -31,14 +31,14 @@ import com.veiculos.repository.FabricanteRepository;
 
 /**
  * Lista todos os fabricantes.
- * Transação: @Transactional(readOnly = true) – otimiza para leitura e evita escritas acidentais.
+ * Transação: @Transactional(readOnly = true) — otimiza para leitura e evita escritas acidentais.
  *
  * @return lista de FabricanteDTO.
  */
  
 /**
  * Busca um fabricante pelo ID.
- * Transação: @Transactional(readOnly = true) – apenas leitura.
+ * Transação: @Transactional(readOnly = true) — apenas leitura.
  *
  * @param id identificador do fabricante.
  * @return FabricanteDTO correspondente.
@@ -59,7 +59,7 @@ import com.veiculos.repository.FabricanteRepository;
  */
  
 /**
- * Atualiza nome e pa?s de origem de um fabricante existente.
+ * Atualiza nome e país de origem de um fabricante existente.
  * Transação: @Transactional (leitura/escrita).
  *
  * @param id identificador do fabricante a atualizar.
@@ -93,21 +93,21 @@ public class FabricanteService {
     public FabricanteDTO buscarPorId(Long id) {
         return repository.findById(id)
                 .map(FabricanteMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Fabricante n�o encontrado"));
+                .orElseThrow(() -> new RuntimeException("Fabricante não encontrado"));
     }
 
     @Transactional
     public FabricanteDTO criar(FabricanteDTO dto) {
         if (dto.getId() != null) {
-            throw new IllegalArgumentException("Novo fabricante n�o deve ter ID");
+            throw new IllegalArgumentException("Novo fabricante não deve ter ID");
         }
         if (repository.existsByNome(dto.getNome())) {
-            throw new IllegalArgumentException("J� existe fabricante com esse nome");
+            throw new IllegalArgumentException("Já existe fabricante com esse nome");
         }
         Fabricante salvo = repository.save(FabricanteMapper.toEntity(dto));
         if(salvo.getId() != null) {
-            // Aqui voc� pode chamar o servi�o de email para enviar a notifica��o
-            emailService.enviarEmail("senac@yahoo.com.br", "Novo Fabricante Criado", "Um novo fabricante foi criado: " + salvo.getNome());
+            // Aqui você pode chamar o serviço de email para enviar a notificação
+            //emailService.enviarEmail("sidney.mind@yahoo.com.br", "Novo Fabricante Criado", "Um novo fabricante foi criado: " + salvo.getNome());
         }
         return FabricanteMapper.toDTO(salvo);
     }
@@ -123,7 +123,7 @@ public class FabricanteService {
 
     @Transactional
     public void deletar(Long id) {
-        if (repository.existsById(id)) {
+        if (!repository.existsById(id)) {
             throw new RuntimeException("Fabricante não encontrado");
         }
         repository.deleteById(id);
