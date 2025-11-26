@@ -42,9 +42,14 @@ class FabricanteControllerTest {
                 .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
-                .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.nome").value(nomeGerado))
-                .andExpect(jsonPath("$.paisOrigem").value("Japao"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.status").value(201))
+                .andExpect(jsonPath("$.message").value("Fabricante criado com sucesso"))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").isNumber())
+                .andExpect(jsonPath("$.data.nome").value(nomeGerado))
+                .andExpect(jsonPath("$.data.paisOrigem").value("Japao"))
+                .andExpect(jsonPath("$.timestamp").exists());
 
         assertThat(repository.count()).isEqualTo(before + 1);
     }
@@ -63,7 +68,12 @@ class FabricanteControllerTest {
         mockMvc.perform(get("/api/fabricantes")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").exists());
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("Lista de fabricantes recuperada com sucesso"))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data[0].id").exists())
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 
     @Test
@@ -85,9 +95,14 @@ class FabricanteControllerTest {
         mockMvc.perform(get("/api/fabricantes/" + id)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(Long.parseLong(id)))
-                .andExpect(jsonPath("$.nome").value(nome))
-                .andExpect(jsonPath("$.paisOrigem").value("Brasil"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("Fabricante encontrado com sucesso"))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").value(Long.parseLong(id)))
+                .andExpect(jsonPath("$.data.nome").value(nome))
+                .andExpect(jsonPath("$.data.paisOrigem").value("Brasil"))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 
     @Test
@@ -110,9 +125,14 @@ class FabricanteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(Long.parseLong(id)))
-                .andExpect(jsonPath("$.nome").value(nomeAtualizado))
-                .andExpect(jsonPath("$.paisOrigem").value("Chile"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("Fabricante atualizado com sucesso"))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").value(Long.parseLong(id)))
+                .andExpect(jsonPath("$.data.nome").value(nomeAtualizado))
+                .andExpect(jsonPath("$.data.paisOrigem").value("Chile"))
+                .andExpect(jsonPath("$.timestamp").exists());
 
         // valida no banco
         Long idLong = Long.parseLong(id);
@@ -135,7 +155,12 @@ class FabricanteControllerTest {
         String id = location.substring(location.lastIndexOf('/') + 1);
 
         mockMvc.perform(delete("/api/fabricantes/" + id))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("Fabricante deletado com sucesso"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andExpect(jsonPath("$.timestamp").exists());
 
         // valida que não existe mais
         assertThat(repository.findById(Long.parseLong(id))).isEmpty();
