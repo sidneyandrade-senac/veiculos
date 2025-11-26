@@ -1,8 +1,8 @@
 /*
-    FunÁ„o para criar uma tabela HTML para exibir os modelos de veÌculos
-    geralmente implementado para tabelas especÌficas onde o cabeÁalho È
+    Fun√ß√£o para criar uma tabela HTML para exibir os modelos de ve√≠culos
+    geralmente implementado para tabelas espec√≠ficas onde o cabe√ßalho √©
     fixo e os dados podem ter estruturas diferentes
-    Par‚metros:
+    Par√¢metros:
     dados: array - array de objetos com os dados a serem exibidos na tabela
     Exemplo de uso:
     const tabelaModelos = criarTabelaModelo(dados);
@@ -11,7 +11,7 @@ const criarTabelaModelo = function(dados) {
     const tabela = document.createElement("table");
     const thead = document.createElement("thead");
     const tbody = document.createElement("tbody");
-    //cria o cabeÁalho da tabela
+    //cria o cabe√ßalho da tabela
     const trTitle = document.createElement("tr");
     const th = document.createElement("th");
     th.textContent = "Modelos";
@@ -19,7 +19,7 @@ const criarTabelaModelo = function(dados) {
     trTitle.appendChild(th);
     thead.appendChild(trTitle);
 
-    const cabecalho = ["Modelo", "Fabricante", "Pais de Origem"];
+    const cabecalho = ["Modelo", "Fabricante", "Pa√≠s de Origem"];
     const tr = document.createElement("tr");
     cabecalho.forEach(function(campo) {
         const th = document.createElement("th");
@@ -50,9 +50,48 @@ const criarTabelaModelo = function(dados) {
         tdPaisOrigem.textContent = item.fabricante.paisOrigem;
         tr.appendChild(tdPaisOrigem);
 
+        //icones
+        const deletar = document.createElement("td");
+        deletar.innerHTML = '<button class="btn delete">Deletar</button>';
+        deletar.addEventListener("click", async function() {
+           const resultado = await setDelete(`http://localhost:8080/api/modelos/${item.id}`);
+
+           if (isSuccess(resultado)) {
+               this.parentElement.remove();
+               alert("Modelo exclu√≠do com sucesso!");
+           } else {
+               mostrarErro(resultado);
+           }
+        });
+        
+        tr.appendChild(deletar);
+
         tbody.appendChild(tr);
     });
     tabela.appendChild(tbody);
 
     return tabela;
 }
+
+/*implementa√ß√£o para salvar modelo*/
+document.getElementById("salvar-modelo").addEventListener("click", async function(event) {
+    event.preventDefault();
+    const nome = document.getElementById("nome-modelo").value;
+    const fabricanteId = document.getElementById("fabricante-modelo").value;
+    const fabricanteNome = document.getElementById("fabricante-modelo").options[document.getElementById("fabricante-modelo").selectedIndex].text;
+    const novoModelo = { nome: nome, fabricante: { id: fabricanteId, nome: fabricanteNome } };
+    const resultado = await postData("http://localhost:8080/api/modelos", novoModelo);
+    if (isSuccess(resultado)) {
+        alert("Modelo salvo com sucesso!");
+        document.getElementById("nome-modelo").value = "";
+        document.getElementById("fabricante-modelo").value = "";
+        MODAL.style.display = "none";
+        //recriar a tabela de modelos
+        setRemoverElementos(".tabela-dados");
+        document.querySelector("#modelos").style.display = "block";
+        const dadosModelos = await getData("http://localhost:8080/api/modelos");
+        document.querySelector("#modelos").appendChild(criarTabelaModelo(dadosModelos));
+    } else {
+        mostrarErro(resultado);
+    }
+});

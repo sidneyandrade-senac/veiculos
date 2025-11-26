@@ -21,17 +21,17 @@ public class ViaCepHealthIndicator implements HealthIndicator {
             Map<?, ?> resp = restTemplate.getForObject(url, Map.class);
             long elapsed = System.currentTimeMillis() - start;
 
-            // Classifica��o por tempo
+            // Classificaá§ão por tempo
             String qualidade;
             if (elapsed < 200) {
-                qualidade = "�timo";
+                qualidade = "á³timo";
             } else if (elapsed < 400) {
                 qualidade = "bom";
             } else {
                 qualidade = "ruim";
             }
 
-            // Valida��o de campos esperados
+            // Validaá§ão de campos esperados
             Map<String, String> esperado = new HashMap<>();
             esperado.put("cep", "01001-000");
             esperado.put("uf", "SP");
@@ -52,12 +52,12 @@ public class ViaCepHealthIndicator implements HealthIndicator {
             return builder
                     .withDetail("API Externa", url)
                     .withDetail("Tempo de Resposta (ms)", elapsed)
-                    .withDetail("Classifica��o", qualidade)
-                    .withDetail("Valida��o", validacaoOk ? "OK" : "Falhou")
+                    .withDetail("Classificaá§ão", qualidade)
+                    .withDetail("Validaá§ão", validacaoOk ? "OK" : "Falhou")
                     .withDetail("CEP", resp != null ? resp.get("cep") : null)
                     .withDetail("Localidade", resp != null ? resp.get("localidade") : null)
                     .withDetail("UF", resp != null ? resp.get("uf") : null)
-                    .withDetail("Diferen�as", validacaoOk ? "Nenhuma" : String.join("; ", diferencas))
+                    .withDetail("Diferená§as", validacaoOk ? "Nenhuma" : String.join("; ", diferencas))
                     .withDetail("Origem", "API")
                     .build();
         } catch (Exception e) {

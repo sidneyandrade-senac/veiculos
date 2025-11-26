@@ -179,6 +179,70 @@ table.tabela-dados {
   box-shadow: var(--shadow-sm);
 }
 
+#modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  width: 300px;
+  height: auto;
+  z-index: 1;
+}
+#close-modal{
+  position: absolute;
+  top: 15px;
+  right: 10px;
+  cursor: pointer;
+}
+#form-modelo,
+#form-fabricante {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+#modal input{
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+#modal label{
+  margin-bottom: 5px;
+  display: block;
+  font-weight: 600;
+}
+#modal select{
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+#modal button{
+  background: var(--brand-mid);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  width: 50%;
+}
+.botao-novo{
+  margin-top: 20px;
+  background: var(--brand-accent);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
 
 /* Responsividade */
 @media (max-width: 900px) {
