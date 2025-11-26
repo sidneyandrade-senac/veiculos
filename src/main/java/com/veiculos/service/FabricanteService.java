@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.veiculos.dto.FabricanteDTO;
 import com.veiculos.entity.Fabricante;
+import com.veiculos.exception.custom.ResourceAlreadyExistsException;
+import com.veiculos.exception.custom.ResourceNotFoundException;
+import com.veiculos.exception.custom.ValidationException;
 import com.veiculos.mapper.FabricanteMapper;
 import com.veiculos.repository.FabricanteRepository;
 
@@ -93,16 +96,16 @@ public class FabricanteService {
     public FabricanteDTO buscarPorId(Long id) {
         return repository.findById(id)
                 .map(FabricanteMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Fabricante não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Fabricante", id));
     }
 
     @Transactional
     public FabricanteDTO criar(FabricanteDTO dto) {
         if (dto.getId() != null) {
-            throw new IllegalArgumentException("Novo fabricante não deve ter ID");
+            throw new ValidationException("id", "Novo fabricante não deve ter ID");
         }
         if (repository.existsByNome(dto.getNome())) {
-            throw new IllegalArgumentException("Já existe fabricante com esse nome");
+            throw new ResourceAlreadyExistsException("Fabricante", "nome", dto.getNome());
         }
         Fabricante salvo = repository.save(FabricanteMapper.toEntity(dto));
         if(salvo.getId() != null) {
@@ -115,7 +118,7 @@ public class FabricanteService {
     @Transactional
     public FabricanteDTO atualizar(Long id, FabricanteDTO dto) {
         Fabricante existente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Fabricante não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Fabricante", id));
         existente.setNome(dto.getNome());
         existente.setPaisOrigem(dto.getPaisOrigem());
         return FabricanteMapper.toDTO(repository.save(existente));
@@ -124,7 +127,7 @@ public class FabricanteService {
     @Transactional
     public void deletar(Long id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Fabricante não encontrado");
+            throw new ResourceNotFoundException("Fabricante", id);
         }
         repository.deleteById(id);
     }
