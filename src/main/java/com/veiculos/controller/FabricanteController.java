@@ -4,11 +4,13 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.veiculos.dto.FabricanteDTO;
+import com.veiculos.response.ApiResponse;
 import com.veiculos.service.FabricanteService;
 
 @RestController
@@ -20,32 +22,59 @@ public class FabricanteController {
 
 
     @GetMapping
-    public List<FabricanteDTO> listar() {
-        return service.listar();
+    public ResponseEntity<ApiResponse<List<FabricanteDTO>>> listar() {
+        List<FabricanteDTO> fabricantes = service.listar();
+        ApiResponse<List<FabricanteDTO>> response = ApiResponse.success(
+            fabricantes, 
+            "Lista de fabricantes recuperada com sucesso", 
+            HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public FabricanteDTO buscar(@PathVariable Long id) {
-        return service.buscarPorId(id);
+    public ResponseEntity<ApiResponse<FabricanteDTO>> buscar(@PathVariable Long id) {
+        FabricanteDTO fabricante = service.buscarPorId(id);
+        ApiResponse<FabricanteDTO> response = ApiResponse.success(
+            fabricante, 
+            "Fabricante encontrado com sucesso", 
+            HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<FabricanteDTO> criar(@RequestBody FabricanteDTO dto) {
+    public ResponseEntity<ApiResponse<FabricanteDTO>> criar(@RequestBody FabricanteDTO dto) {
         FabricanteDTO criado = service.criar(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(criado.getId()).toUri();
-        return ResponseEntity.created(location).body(criado);
-        //return ResponseEntity.created(null).body(criado);
+        
+        ApiResponse<FabricanteDTO> response = ApiResponse.created(
+            criado, 
+            "Fabricante criado com sucesso"
+        );
+        return ResponseEntity.created(location).body(response);
     }
 
     @PutMapping("/{id}")
-    public FabricanteDTO atualizar(@PathVariable Long id, @RequestBody FabricanteDTO dto) {
-        return service.atualizar(id, dto);
+    public ResponseEntity<ApiResponse<FabricanteDTO>> atualizar(@PathVariable Long id, @RequestBody FabricanteDTO dto) {
+        FabricanteDTO atualizado = service.atualizar(id, dto);
+        ApiResponse<FabricanteDTO> response = ApiResponse.success(
+            atualizado, 
+            "Fabricante atualizado com sucesso", 
+            HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deletar(@PathVariable Long id) {
         service.deletar(id);
-        return ResponseEntity.noContent().build();
+        ApiResponse<Void> response = ApiResponse.success(
+            null, 
+            "Fabricante deletado com sucesso", 
+            HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 }

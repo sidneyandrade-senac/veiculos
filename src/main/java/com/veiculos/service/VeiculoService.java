@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.veiculos.dto.VeiculoDTO;
 import com.veiculos.entity.Veiculo;
+import com.veiculos.exception.custom.ResourceAlreadyExistsException;
+import com.veiculos.exception.custom.ResourceNotFoundException;
+import com.veiculos.exception.custom.ValidationException;
 import com.veiculos.mapper.VeiculoMapper;
 import com.veiculos.repository.ModeloRepository;
 import com.veiculos.repository.VeiculoRepository;
@@ -43,19 +46,22 @@ public class VeiculoService {
 
     @Transactional(readOnly = true)
     public VeiculoDTO buscarPorId(Long id) {
-    return repository.findById(id)
-        .map(VeiculoMapper::toDTO)
-        .orElseThrow(() -> new RuntimeException(messageSource.getMessage("veiculo.nao.encontrado", null, LocaleContextHolder.getLocale())));
+        String mensagem = messageSource.getMessage("veiculo.nao.encontrado", null, LocaleContextHolder.getLocale());
+        return repository.findById(id)
+            .map(VeiculoMapper::toDTO)
+            .orElseThrow(() -> new ResourceNotFoundException(mensagem));
     }
 
     @Transactional(readOnly = true)
     public VeiculoDTO buscarPorPlaca(String placa) {
         if (placa == null || placa.isBlank()) {
-            throw new IllegalArgumentException(messageSource.getMessage("veiculo.placa.obrigatoria", null, LocaleContextHolder.getLocale()));
+            String mensagem = messageSource.getMessage("veiculo.placa.obrigatoria", null, LocaleContextHolder.getLocale());
+            throw new ValidationException("placa", mensagem);
         }
+        String mensagemNaoEncontrado = messageSource.getMessage("veiculo.nao.encontrado", null, LocaleContextHolder.getLocale());
         return repository.findByPlaca(placa.trim())
                 .map(VeiculoMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException(messageSource.getMessage("veiculo.nao.encontrado", null, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new ResourceNotFoundException(mensagemNaoEncontrado));
     }
 
     @Transactional(readOnly = true)
@@ -66,31 +72,36 @@ public class VeiculoService {
     @Transactional(readOnly = true)
     public List<VeiculoDTO> buscarPorPlacaParcial(String termo) {
         if (termo == null || termo.isBlank()) {
-            throw new IllegalArgumentException(messageSource.getMessage("veiculo.placa.obrigatoria", null, LocaleContextHolder.getLocale()));
+            String mensagem = messageSource.getMessage("veiculo.placa.obrigatoria", null, LocaleContextHolder.getLocale());
+            throw new ValidationException("placa", mensagem);
         }
         return VeiculoMapper.toDTOList(repository.findByPlacaContainingIgnoreCase(termo.trim()));
     }
 
     @Transactional
     public VeiculoDTO criar(VeiculoDTO dto) {
-        //todos as excecoes IllegalArgumentException que nao foram tratadas serao capturadas pelo GlobalExceptionHandler e retornam 400 Bad Request ou 409 Conflict
         if (dto.getId() != null) {
-            throw new IllegalArgumentException(messageSource.getMessage("operacao.falha", new Object[]{"ID presente"}, LocaleContextHolder.getLocale()));
+            String mensagem = messageSource.getMessage("operacao.falha", new Object[]{"ID presente"}, LocaleContextHolder.getLocale());
+            throw new ValidationException("id", mensagem);
         }
-            if (!ValidaVeiculo.isPlacaValida(dto)) {
-                throw new IllegalArgumentException(messageSource.getMessage("erro.formato.placa", new Object[]{dto.getPlaca().toString()}, LocaleContextHolder.getLocale()));
+        if (!ValidaVeiculo.isPlacaValida(dto)) {
+            String mensagem = messageSource.getMessage("erro.formato.placa", new Object[]{dto.getPlaca().toString()}, LocaleContextHolder.getLocale());
+            throw new ValidationException("placa", mensagem);
         }
         if (repository.existsByPlaca(dto.getPlaca())) {
-            throw new IllegalArgumentException(messageSource.getMessage("erro.recurso.existe", new Object[]{dto.getPlaca().toString()}, LocaleContextHolder.getLocale()));
+            throw new ResourceAlreadyExistsException("Veiculo", "placa", dto.getPlaca());
         }
         if (dto.getModelo() == null || dto.getModelo().getId() == null) {
-            throw new IllegalArgumentException(messageSource.getMessage("erro.recurso.invalido", new Object[]{"Modelo"}, LocaleContextHolder.getLocale()));
+            String mensagem = messageSource.getMessage("erro.recurso.invalido", new Object[]{"Modelo"}, LocaleContextHolder.getLocale());
+            throw new ValidationException("modelo", mensagem);
         }
         if (modeloRepository.findById(dto.getModelo().getId()).isEmpty()) {
-            throw new IllegalArgumentException(messageSource.getMessage("recurso.nao.encontrado", new Object[]{"Modelo"}, LocaleContextHolder.getLocale()));
+            String mensagem = messageSource.getMessage("recurso.nao.encontrado", new Object[]{"Modelo"}, LocaleContextHolder.getLocale());
+            throw new ResourceNotFoundException(mensagem);
         }
         if (dto.getAno() == null || dto.getAno() < 1886 || dto.getAno() > Year.now().getValue() + 1) {
-            throw new IllegalArgumentException(messageSource.getMessage("erro.formato.ano", null, LocaleContextHolder.getLocale()));
+            String mensagem = messageSource.getMessage("erro.formato.ano", null, LocaleContextHolder.getLocale());
+            throw new ValidationException("ano", mensagem);
         }
         Veiculo salvo = repository.save(VeiculoMapper.toEntity(dto));
         return VeiculoMapper.toDTO(salvo);
@@ -98,12 +109,12 @@ public class VeiculoService {
 
     @Transactional
     public VeiculoDTO atualizar(Long id, VeiculoDTO dto) {
-        //valida??es similares a criar, mas permite atualizar parcialmente (PATCH)
-    Veiculo existente = repository.findById(id)
-        .orElseThrow(() -> new RuntimeException(messageSource.getMessage("veiculo.nao.encontrado", null, LocaleContextHolder.getLocale())));
+        String mensagemNaoEncontrado = messageSource.getMessage("veiculo.nao.encontrado", null, LocaleContextHolder.getLocale());
+        Veiculo existente = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException(mensagemNaoEncontrado));
         if (dto.getPlaca() != null && !dto.getPlaca().equals(existente.getPlaca())) {
             if (repository.existsByPlaca(dto.getPlaca())) {
-                throw new IllegalArgumentException(messageSource.getMessage("erro.recurso.existe", new Object[]{dto.getPlaca()}, LocaleContextHolder.getLocale()));
+                throw new ResourceAlreadyExistsException("Veiculo", "placa", dto.getPlaca());
             }
             existente.setPlaca(dto.getPlaca());
         }
@@ -118,7 +129,8 @@ public class VeiculoService {
     @Transactional
     public void deletar(Long id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException(messageSource.getMessage("veiculo.nao.encontrado", null, LocaleContextHolder.getLocale()));
+            String mensagem = messageSource.getMessage("veiculo.nao.encontrado", null, LocaleContextHolder.getLocale());
+            throw new ResourceNotFoundException(mensagem);
         }
         repository.deleteById(id);
     }

@@ -60,8 +60,12 @@ class FabricanteControllerAdvancedTest {
                             .content(json(nome, "Brasil")))
                     .andExpect(status().isCreated())
                     .andExpect(header().exists("Location"))
-                    .andExpect(jsonPath("$.id").isNumber())
-                    .andExpect(jsonPath("$.nome").value(nome));
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.status").value(201))
+                    .andExpect(jsonPath("$.message").value("Fabricante criado com sucesso"))
+                    .andExpect(jsonPath("$.data.id").isNumber())
+                    .andExpect(jsonPath("$.data.nome").value(nome))
+                    .andExpect(jsonPath("$.timestamp").exists());
             assertThat(repository.count()).isEqualTo(before + 1);
         }
 
@@ -73,7 +77,12 @@ class FabricanteControllerAdvancedTest {
                     .andExpect(status().isCreated());
             long before = repository.count();
         mockMvc.perform(post("/api/fabricantes").contentType(MediaType.APPLICATION_JSON).content(json(nome, "BR")))
-            .andExpect(status().isConflict());
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.success").value(false))
+            .andExpect(jsonPath("$.status").value(409))
+            .andExpect(jsonPath("$.message").exists())
+            .andExpect(jsonPath("$.errors").isArray())
+            .andExpect(jsonPath("$.timestamp").exists());
             assertThat(repository.count()).isEqualTo(before);
         }
 
@@ -83,7 +92,12 @@ class FabricanteControllerAdvancedTest {
             long before = repository.count();
             String payload = "{\"id\":1,\"nome\":\"" + novoNomeUnico("ComId") + "\",\"paisOrigem\":\"BR\"}";
         mockMvc.perform(post("/api/fabricantes").contentType(MediaType.APPLICATION_JSON).content(payload))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.success").value(false))
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.message").exists())
+            .andExpect(jsonPath("$.errors").isArray())
+            .andExpect(jsonPath("$.timestamp").exists());
             assertThat(repository.count()).isEqualTo(before);
         }
         // TODO 1.x Campos obrigatórios / tamanho / JSON inválido quando houver validação e handler.
@@ -101,7 +115,10 @@ class FabricanteControllerAdvancedTest {
                 mockMvc.perform(get("/api/fabricantes"))
                         .andExpect(status().isOk())
                         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                        .andExpect(jsonPath("$.length()").value(0));
+                        .andExpect(jsonPath("$.success").value(true))
+                        .andExpect(jsonPath("$.status").value(200))
+                        .andExpect(jsonPath("$.data").isArray())
+                        .andExpect(jsonPath("$.data.length()").value(0));
             }
         }
 
@@ -116,14 +133,22 @@ class FabricanteControllerAdvancedTest {
             }
             mockMvc.perform(get("/api/fabricantes"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[0].id").exists());
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.status").value(200))
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data[0].id").exists());
         }
 
         @Test
     @DisplayName("2.3 Buscar inexistente retorna 404")
         void buscaInexistente() throws Exception {
         mockMvc.perform(get("/api/fabricantes/999999"))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.success").value(false))
+            .andExpect(jsonPath("$.status").value(404))
+            .andExpect(jsonPath("$.message").exists())
+            .andExpect(jsonPath("$.errors").isArray())
+            .andExpect(jsonPath("$.timestamp").exists());
         }
     }
 
@@ -147,8 +172,12 @@ class FabricanteControllerAdvancedTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json(novoNome, "Portugal")))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.nome").value(novoNome))
-                    .andExpect(jsonPath("$.paisOrigem").value("Portugal"));
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.status").value(200))
+                    .andExpect(jsonPath("$.message").value("Fabricante atualizado com sucesso"))
+                    .andExpect(jsonPath("$.data.nome").value(novoNome))
+                    .andExpect(jsonPath("$.data.paisOrigem").value("Portugal"))
+                    .andExpect(jsonPath("$.timestamp").exists());
         }
 
         @Test
@@ -157,7 +186,11 @@ class FabricanteControllerAdvancedTest {
         mockMvc.perform(put("/api/fabricantes/999999")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(novoNomeUnico("Nada"), "BR")))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.success").value(false))
+            .andExpect(jsonPath("$.status").value(404))
+            .andExpect(jsonPath("$.message").exists())
+            .andExpect(jsonPath("$.errors").isArray());
         }
 
         @Test
@@ -174,7 +207,11 @@ class FabricanteControllerAdvancedTest {
         mockMvc.perform(put("/api/fabricantes/" + id1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(nome2, "AR")))
-            .andExpect(status().isConflict());
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.success").value(false))
+            .andExpect(jsonPath("$.status").value(409))
+            .andExpect(jsonPath("$.message").exists())
+            .andExpect(jsonPath("$.errors").isArray());
         }
     }
 
@@ -194,16 +231,25 @@ class FabricanteControllerAdvancedTest {
             assertThat(loc).as("Location header deve estar presente para deleção").isNotNull();
             String id = loc != null ? loc.substring(loc.lastIndexOf('/') + 1) : "";
             mockMvc.perform(delete("/api/fabricantes/" + id))
-                    .andExpect(status().isNoContent());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.status").value(200))
+                    .andExpect(jsonPath("$.message").value("Fabricante deletado com sucesso"))
+                    .andExpect(jsonPath("$.timestamp").exists());
         mockMvc.perform(get("/api/fabricantes/" + id))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.success").value(false));
         }
 
     @Test
     @DisplayName("4.2 Deletar inexistente retorna 404")
         void deletaInexistente() throws Exception {
         mockMvc.perform(delete("/api/fabricantes/999999"))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.success").value(false))
+            .andExpect(jsonPath("$.status").value(404))
+            .andExpect(jsonPath("$.message").exists())
+            .andExpect(jsonPath("$.errors").isArray());
         }
     }
 }
