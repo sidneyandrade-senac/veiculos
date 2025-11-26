@@ -30,26 +30,26 @@ public class ModeloService {
     public ModeloDTO buscarPorId(Long id) {
         return repository.findById(id)
                 .map(ModeloMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Modelo n„o encontrado"));
+                .orElseThrow(() -> new RuntimeException("Modelo n√£o encontrado"));
     }
 
     @Transactional
     public ModeloDTO criar(ModeloDTO dto) {
         if (dto.getId() != null) {
-            throw new IllegalArgumentException("Novo modelo n„o deve ter ID");
+            throw new IllegalArgumentException("Novo modelo n√£o deve ter ID");
         }
         if (repository.existsByNome(dto.getNome())) {
-            throw new IllegalArgumentException("J· existe modelo com esse nome");
+            throw new IllegalArgumentException("J√° existe modelo com esse nome");
         }
         if (dto.getFabricante() == null || dto.getFabricante().getId() == null) {
-            throw new IllegalArgumentException("Fabricante inv·lido");
+            throw new IllegalArgumentException("Fabricante inv√°lido");
         }
         if (fabricanteRepository.findById(dto.getFabricante().getId()).isEmpty()) {
-            throw new IllegalArgumentException("Fabricante n„o encontrado");
+            throw new IllegalArgumentException("Fabricante n√£o encontrado");
         }
         //verifica/valida se o id corresponde ao nome do fabricante
         if (!fabricanteRepository.findById(dto.getFabricante().getId()).get().getNome().equals(dto.getFabricante().getNome())) {
-            throw new IllegalArgumentException("Identificador de fabricante n„o corresponde");
+            throw new IllegalArgumentException("Identificador de fabricante n√£o corresponde");
         }
 
         Modelo salvo = repository.save(ModeloMapper.toEntity(dto));
@@ -59,8 +59,14 @@ public class ModeloService {
     @Transactional
     public void deletar(Long id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Modelo n„o encontrado");
+            throw new RuntimeException("Modelo n√£o encontrado");
         }
+        
+        // Verificar se existem ve√≠culos associados a este modelo
+        if (repository.temVeiculosAssociados(id)) {
+            throw new RuntimeException("N√£o √© poss√≠vel excluir o modelo. Existem ve√≠culos associados a ele.");
+        }
+        
         repository.deleteById(id);
     }
 }
