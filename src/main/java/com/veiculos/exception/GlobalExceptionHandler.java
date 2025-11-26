@@ -27,8 +27,8 @@ public class GlobalExceptionHandler {
 
     private String defaultMessage(HttpStatus status) {
         return switch (status) {
-            case NOT_FOUND -> "Recurso n?o encontrado";
-            case BAD_REQUEST -> "RequisiÁ„o inv·lida";
+            case NOT_FOUND -> "Recurso n√£o encontrado";
+            case BAD_REQUEST -> "Requisi√ß√£o inv√°lida";
             case CONFLICT -> "Conflito de dados";
             default -> "Erro interno";
         };
@@ -39,9 +39,15 @@ public class GlobalExceptionHandler {
         String msg = ex.getMessage();
         if (msg != null) {
             String lower = msg.toLowerCase();
-            if (lower.contains("n„o encontrado")) {
-                //log.debug("Recurso n„o encontrado: {}", msg);
+            if (lower.contains("n√£o encontrado")) {
+                //log.debug("Recurso nao encontrado: {}", msg);
                 return body(HttpStatus.NOT_FOUND, msg); //404
+            }
+            // Tratamento para violacao de integridade referencial
+            if (lower.contains("ve√≠culos associados") || 
+                lower.contains("n√£o √© poss√≠vel excluir") ||
+                lower.contains("existem ve√≠culos associados")) {
+                return body(HttpStatus.CONFLICT, msg); //409
             }
         }
         //log.error("Erro inesperado", ex);
@@ -53,7 +59,7 @@ public class GlobalExceptionHandler {
         //modifica o status.code dependendo da mensagem
         String msg = ex.getMessage();
         String lower = msg == null ? "" : msg.toLowerCase();
-        if (lower.contains("j· existe")) {
+        if (lower.contains("ja existe")) {
             return body(HttpStatus.CONFLICT, msg); //409
         }
         return body(HttpStatus.BAD_REQUEST, msg); //400
@@ -61,17 +67,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> handleDataIntegrity(DataIntegrityViolationException ex) {
-    //log.error("Viola??o de integridade", ex);
-        return body(HttpStatus.CONFLICT, "ViolaÁ„o de integridade");
+    //log.error("Violacao de integridade", ex);
+        return body(HttpStatus.CONFLICT, "Violacao de integridade");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidation(MethodArgumentNotValidException ex) {
-        return body(HttpStatus.BAD_REQUEST, "Dados inv·lidos");
+        return body(HttpStatus.BAD_REQUEST, "Dados invalidos");
     }
 
     @ExceptionHandler(PropertyReferenceException.class)
     public ResponseEntity<Object> handlePropertyReference(PropertyReferenceException ex) {
-        return body(HttpStatus.BAD_REQUEST, "Propriedade de ordenaÁ„o inv·lida: " + ex.getPropertyName());
+        return body(HttpStatus.BAD_REQUEST, "Propriedade de ordenacao invalida: " + ex.getPropertyName());
     }
 }

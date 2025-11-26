@@ -59,6 +59,11 @@ public class VeiculoService {
     }
 
     @Transactional(readOnly = true)
+    public boolean existePorPlaca(String placa) {
+        return repository.existsByPlaca(placa);
+    }   
+
+    @Transactional(readOnly = true)
     public List<VeiculoDTO> buscarPorPlacaParcial(String termo) {
         if (termo == null || termo.isBlank()) {
             throw new IllegalArgumentException(messageSource.getMessage("veiculo.placa.obrigatoria", null, LocaleContextHolder.getLocale()));

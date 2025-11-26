@@ -23,7 +23,7 @@ public class Veiculo {
     @Column(nullable = false, length = 50)
     private String cor;
 
-    //precision = 10 - Até 10 dígitos totais
+    //precision = 10 - AtÃ© 10 dÃ­gitos totais
     //scale = 2 - 2 casas decimais (ex: 99.999.999,99)
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valor;

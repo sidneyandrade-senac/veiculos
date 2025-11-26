@@ -23,7 +23,7 @@ public class VeiculoController {
     private VeiculoService service;
 
     //Personalizável via query params: ?page=0&size=10&sort=dataCadastro,desc ou outro campo (ex.: placa,asc).
-    //QUANDO PASSADO VALOR SEM OS PARAMETROS PEGA O DEFAULT
+    //QUANDO PASSADO VALOR SEM OS PARÂMETROS PEGA O DEFAULT
     //para paginar usar ?page=1 ... ?page=2
     @GetMapping
     public Page<VeiculoDTO> listar(
@@ -40,12 +40,19 @@ public class VeiculoController {
     }
 
     @GetMapping("/{id}")
-    public VeiculoDTO buscar(@PathVariable Long id) { return service.buscarPorId(id); }
+    public VeiculoDTO buscar(@PathVariable Long id) { 
+        return service.buscarPorId(id);
+    }
 
     @GetMapping("/placa/{placa}")
     public VeiculoDTO buscarPorPlaca(@PathVariable String placa) {
         return service.buscarPorPlaca(placa);
     }
+
+    @GetMapping("/existe/{placa}")
+    public boolean existePorPlaca(@PathVariable String placa) {
+        return service.existePorPlaca(placa);
+    }   
 
     @GetMapping("/placa")
     public List<VeiculoDTO> buscarPorPlacaParcial(@RequestParam("trecho_placa") String trecho_placa) {
