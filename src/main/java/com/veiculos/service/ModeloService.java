@@ -57,6 +57,34 @@ public class ModeloService {
     }
 
     @Transactional
+    public ModeloDTO atualizar(Long id, ModeloDTO dto) {
+        Modelo existente = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Modelo não encontrado"));
+        
+        // Verifica se o nome já existe em outro modelo
+        if (!existente.getNome().equals(dto.getNome()) && repository.existsByNome(dto.getNome())) {
+            throw new IllegalArgumentException("Já existe modelo com esse nome");
+        }
+        
+        // Valida fabricante
+        if (dto.getFabricante() == null || dto.getFabricante().getId() == null) {
+            throw new IllegalArgumentException("Fabricante inválido");
+        }
+        if (fabricanteRepository.findById(dto.getFabricante().getId()).isEmpty()) {
+            throw new IllegalArgumentException("Fabricante não encontrado");
+        }
+        if (!fabricanteRepository.findById(dto.getFabricante().getId()).get().getNome().equals(dto.getFabricante().getNome())) {
+            throw new IllegalArgumentException("Identificador de fabricante não corresponde");
+        }
+        
+        existente.setNome(dto.getNome());
+        existente.setFabricante(fabricanteRepository.findById(dto.getFabricante().getId()).get());
+        
+        Modelo atualizado = repository.save(existente);
+        return ModeloMapper.toDTO(atualizado);
+    }
+
+    @Transactional
     public void deletar(Long id) {
         if (!repository.existsById(id)) {
             throw new RuntimeException("Modelo não encontrado");
